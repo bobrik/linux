@@ -827,6 +827,10 @@ static const struct bin_table bin_raid_table[] = {
 	{}
 };
 
+static const struct bin_table bin_dm_crypt_table[] = {
+	{ CTL_INT,	DM_CRYPT_MAX_INLINE_SIZE,	"max_inline_size" },
+};
+
 static const struct bin_table bin_scsi_table[] = {
 	{ CTL_INT, DEV_SCSI_LOGGING_LEVEL, "logging_level" },
 	{}
@@ -837,6 +841,7 @@ static const struct bin_table bin_dev_table[] = {
 	/* DEV_HWMON unused */
 	/* DEV_PARPORT	"parport" no longer used */
 	{ CTL_DIR,	DEV_RAID,	"raid",		bin_raid_table },
+	{ CTL_DIR,	DEV_DM_CRYPT,	"dm_crypt",	bin_dm_crypt_table },
 	{ CTL_DIR,	DEV_MAC_HID,	"mac_hid",	bin_mac_hid_files },
 	{ CTL_DIR,	DEV_SCSI,	"scsi",		bin_scsi_table },
 	{ CTL_DIR,	DEV_IPMI,	"ipmi",		bin_ipmi_table },

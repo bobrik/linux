@@ -40,6 +40,41 @@
 
 #define DM_MSG_PREFIX "crypt"
 
+static int sysctl_max_inline_size = 4096 * 4;
+
+static struct ctl_table_header *dm_crypt_table_header;
+
+static struct ctl_table dm_crypt_table[] = {
+	{
+		.procname	= "max_inline_size",
+		.data		= &sysctl_max_inline_size,
+		.maxlen		= sizeof(int),
+		.mode		= S_IRUGO|S_IWUSR,
+		.proc_handler	= proc_dointvec,
+	},
+	{ }
+};
+
+static struct ctl_table dm_crypt_dir_table[] = {
+	{
+		.procname	= "dm_crypt",
+		.maxlen		= 0,
+		.mode		= S_IRUGO|S_IXUGO,
+		.child		= dm_crypt_table,
+	},
+	{ }
+};
+
+static struct ctl_table dm_crypt_root_table[] = {
+	{
+		.procname	= "dev",
+		.maxlen		= 0,
+		.mode		= 0555,
+		.child		= dm_crypt_dir_table,
+	},
+	{ }
+};
+
 /*
  * context holding the current state of a multi-part conversion
  */
@@ -229,6 +264,7 @@ static volatile unsigned long dm_crypt_pages_per_client;
 
 static void clone_init(struct dm_crypt_io *, struct bio *);
 static void kcryptd_queue_crypt(struct dm_crypt_io *io);
+static void kcryptd_inline_crypt(struct dm_crypt_io *io);
 static struct scatterlist *crypt_get_sg_data(struct crypt_config *cc,
 					     struct scatterlist *sg);
 
@@ -1811,19 +1847,28 @@ static void kcryptd_async_done(struct crypto_async_request *async_req,
 static void kcryptd_crypt(struct work_struct *work)
 {
 	struct dm_crypt_io *io = container_of(work, struct dm_crypt_io, work);
-
-	if (bio_data_dir(io->base_bio) == READ)
-		kcryptd_crypt_read_convert(io);
-	else
-		kcryptd_crypt_write_convert(io);
+	kcryptd_inline_crypt(io);
 }
 
 static void kcryptd_queue_crypt(struct dm_crypt_io *io)
 {
+	if (!in_irq() && sysctl_max_inline_size >= io->base_bio->bi_iter.bi_size) {
+		kcryptd_inline_crypt(io);
+		return;
+	}
+
 	struct crypt_config *cc = io->cc;
 
 	INIT_WORK(&io->work, kcryptd_crypt);
 	queue_work(cc->crypt_queue, &io->work);
+}
+
+static void kcryptd_inline_crypt(struct dm_crypt_io *io)
+{
+	if (bio_data_dir(io->base_bio) == READ)
+		kcryptd_crypt_read_convert(io);
+	else
+		kcryptd_crypt_write_convert(io);
 }
 
 static void crypt_free_tfms_aead(struct crypt_config *cc)
@@ -3092,11 +3137,14 @@ static int __init dm_crypt_init(void)
 	if (r < 0)
 		DMERR("register failed %d", r);
 
+	dm_crypt_table_header = register_sysctl_table(dm_crypt_root_table);
+
 	return r;
 }
 
 static void __exit dm_crypt_exit(void)
 {
+	unregister_sysctl_table(dm_crypt_table_header);
 	dm_unregister_target(&crypt_target);
 }
 

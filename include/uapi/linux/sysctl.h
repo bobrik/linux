@@ -832,6 +832,7 @@ enum {
 	DEV_MAC_HID=5,
 	DEV_SCSI=6,
 	DEV_IPMI=7,
+	DEV_DM_CRYPT=8,
 };
 
 /* /proc/sys/dev/cdrom */
@@ -853,6 +854,11 @@ enum {
 enum {
 	DEV_RAID_SPEED_LIMIT_MIN=1,
 	DEV_RAID_SPEED_LIMIT_MAX=2
+};
+
+/* /proc/sys/dev/dm_crypt */
+enum {
+	DM_CRYPT_MAX_INLINE_SIZE=1
 };
 
 /* /proc/sys/dev/parport/default */
