@@ -778,6 +778,7 @@ static const struct bin_table bin_fs_xfs_table[] = {
 	{ CTL_INT,	XFS_INHERIT_NODFRG,	"inherit_nodefrag" },
 	{ CTL_INT,	XFS_FILESTREAM_TIMER,	"filestream_centisecs" },
 	{ CTL_INT,	XFS_STATS_CLEAR,	"stats_clear" },
+	{ CTL_INT,	XFS_MEMORY_RECLAIM,	"memory_reclaim" },
 	{}
 };
 

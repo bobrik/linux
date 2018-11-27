@@ -193,6 +193,15 @@ static struct ctl_table xfs_table[] = {
 		.extra1		= &xfs_params.cowb_timer.min,
 		.extra2		= &xfs_params.cowb_timer.max,
 	},
+	{
+		.procname	= "memory_reclaim",
+		.data		= &xfs_params.memory_reclaim.val,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &xfs_params.memory_reclaim.min,
+		.extra2		= &xfs_params.memory_reclaim.max,
+	},
 	/* please keep this the last entry */
 #ifdef CONFIG_PROC_FS
 	{

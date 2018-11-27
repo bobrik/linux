@@ -54,6 +54,12 @@ struct xfs_eofblocks {
  */
 #define XFS_AGITER_INEW_WAIT	0x1	/* wait on new inodes */
 
+enum {
+	XFS_MEMORY_RECLAIM_NONE = 0,
+	XFS_MEMORY_RECLAIM_ASYNC,
+	XFS_MEMORY_RECLAIM_SYNC,
+};
+
 int xfs_iget(struct xfs_mount *mp, struct xfs_trans *tp, xfs_ino_t ino,
 	     uint flags, uint lock_flags, xfs_inode_t **ipp);
 
