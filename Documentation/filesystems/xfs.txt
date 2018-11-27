@@ -331,6 +331,12 @@ The following sysctls are available for the XFS filesystem:
 	is to control the rate at which the allocator moves between
 	allocation groups when allocating extents for new files.
 
+  fs.xfs.memory_reclaim		(Min: 0  Default: 2  Max: 2)
+	Set memory reclaim strategy:
+	0: no inode reclaim (background reclaim is still enabled)
+	1: async inode reclaim of clean inodes only
+	2: sync inode reclaim (includes synchronous writes)
+
 Deprecated Sysctls
 ==================
 
