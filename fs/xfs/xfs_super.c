@@ -1814,6 +1814,10 @@ xfs_fs_nr_cached_objects(
 	/* Paranoia: catch incorrect calls during mount setup or teardown */
 	if (WARN_ON_ONCE(!sb->s_fs_info))
 		return 0;
+
+	if (xfs_memory_reclaim == XFS_MEMORY_RECLAIM_NONE)
+		return 0;
+
 	return xfs_reclaim_inodes_count(XFS_M(sb));
 }
 
