@@ -43,6 +43,7 @@ xfs_param_t xfs_params = {
 	.fstrm_timer	= {	1,		30*100,		3600*100},
 	.eofb_timer	= {	1,		300,		3600*24},
 	.cowb_timer	= {	1,		1800,		3600*24},
+	.memory_reclaim	= {	0,		2,		2,	},
 };
 
 struct xfs_globals xfs_globals = {

@@ -49,6 +49,7 @@ typedef struct xfs_param {
 	xfs_sysctl_val_t fstrm_timer;	/* Filestream dir-AG assoc'n timeout. */
 	xfs_sysctl_val_t eofb_timer;	/* Interval between eofb scan wakeups */
 	xfs_sysctl_val_t cowb_timer;	/* Interval between cowb scan wakeups */
+	xfs_sysctl_val_t memory_reclaim;/* Memory reclaim policy. */
 } xfs_param_t;
 
 /*
@@ -89,6 +90,7 @@ enum {
 	XFS_ROTORSTEP = 20,
 	XFS_INHERIT_NODFRG = 21,
 	XFS_FILESTREAM_TIMER = 22,
+	XFS_MEMORY_RECLAIM = 23,
 };
 
 extern xfs_param_t	xfs_params;
