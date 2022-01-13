@@ -58,10 +58,12 @@ struct request_sock {
 struct tcp_sock {
 	struct inet_connection_sock	inet_conn;
 
+	__u32	rcv_wnd;
 	__u32	rcv_nxt;
 	__u32	snd_nxt;
 	__u32	snd_una;
 	__u32	window_clamp;
+	__u32	rcv_ssthresh;
 	__u8	ecn_flags;
 	__u32	delivered;
 	__u32	delivered_ce;
