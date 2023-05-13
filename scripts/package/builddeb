@@ -179,7 +179,7 @@ install_kernel_headers () {
 			echo tools/objtool/objtool
 		fi
 
-		find arch/$SRCARCH/include Module.symvers include scripts -type f
+		find arch/$SRCARCH/include Module.symvers include scripts rust -type f
 
 		if is_enabled CONFIG_GCC_PLUGINS; then
 			find scripts/gcc-plugins -name \*.so
