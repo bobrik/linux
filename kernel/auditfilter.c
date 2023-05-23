@@ -943,7 +943,7 @@ static inline int audit_add_rule(struct audit_entry *entry)
 	struct list_head *list;
 	int err = 0;
 #ifdef CONFIG_AUDITSYSCALL
-	int dont_count = 0;
+	int syscall_nr, dont_count = 0;
 
 	/* If any of these, don't count towards total */
 	switch(entry->rule.listnr) {
@@ -1007,8 +1007,22 @@ static inline int audit_add_rule(struct audit_entry *entry)
 		list_add_tail_rcu(&entry->list, list);
 	}
 #ifdef CONFIG_AUDITSYSCALL
-	if (!dont_count)
+	if (!dont_count) {
 		audit_n_rules++;
+
+		if (entry->rule.listnr == AUDIT_FILTER_EXIT) {
+			audit_n_syscall_rules++;
+
+			if (entry->rule.action != AUDIT_NEVER) {
+				for (syscall_nr = 0; syscall_nr < NR_syscalls; syscall_nr++) {
+					if (!audit_in_mask(&entry->rule, syscall_nr))
+						continue;
+					if (++audit_syscall_rules[syscall_nr] == 1)
+						set_bit(syscall_nr, audit_syscalls_bitmap);
+				}
+			}
+		}
+	}
 
 	if (!audit_match_signal(entry))
 		audit_signals++;
@@ -1026,7 +1040,7 @@ int audit_del_rule(struct audit_entry *entry)
 	struct list_head *list;
 	int ret = 0;
 #ifdef CONFIG_AUDITSYSCALL
-	int dont_count = 0;
+	int syscall_nr, dont_count = 0;
 
 	/* If any of these, don't count towards total */
 	switch(entry->rule.listnr) {
@@ -1054,8 +1068,22 @@ int audit_del_rule(struct audit_entry *entry)
 		audit_remove_mark_rule(&e->rule);
 
 #ifdef CONFIG_AUDITSYSCALL
-	if (!dont_count)
+	if (!dont_count) {
 		audit_n_rules--;
+
+		if (entry->rule.listnr == AUDIT_FILTER_EXIT) {
+			audit_n_syscall_rules--;
+
+			if (entry->rule.action != AUDIT_NEVER) {
+				for (syscall_nr = 0; syscall_nr < NR_syscalls; syscall_nr++) {
+					if (!audit_in_mask(&entry->rule, syscall_nr))
+						continue;
+					if (--audit_syscall_rules[syscall_nr] == 0)
+						clear_bit(syscall_nr, audit_syscalls_bitmap);
+				}
+			}
+		}
+	}
 
 	if (!audit_match_signal(entry))
 		audit_signals--;

@@ -86,6 +86,15 @@ int audit_n_rules;
 /* determines whether we collect data for signals sent */
 int audit_signals;
 
+/* number of syscall related audit rules */
+int audit_n_syscall_rules;
+
+/* number of rules per syscall */
+int audit_syscall_rules[NR_syscalls];
+
+/* bitmap for checking whether a syscall is audited */
+DECLARE_BITMAP(audit_syscalls_bitmap, NR_syscalls);
+
 struct audit_aux_data {
 	struct audit_aux_data	*next;
 	int			type;
@@ -788,22 +797,6 @@ static enum audit_state audit_filter_task(struct task_struct *tsk, char **key)
 	}
 	rcu_read_unlock();
 	return AUDIT_STATE_BUILD;
-}
-
-static int audit_in_mask(const struct audit_krule *rule, unsigned long val)
-{
-	int word, bit;
-
-	if (val > 0xffffffff)
-		return false;
-
-	word = AUDIT_WORD(val);
-	if (word >= AUDIT_BITMASK_SIZE)
-		return false;
-
-	bit = AUDIT_BIT(val);
-
-	return rule->mask[word] & bit;
 }
 
 /**
@@ -2025,6 +2018,8 @@ void __audit_syscall_entry(int major, unsigned long a1, unsigned long a2,
 		return;
 
 	context->dummy = !audit_n_rules;
+	if (!context->dummy && audit_n_syscall_rules == audit_n_rules)
+		context->dummy = !test_bit(major, audit_syscalls_bitmap);
 	if (!context->dummy && state == AUDIT_STATE_BUILD) {
 		context->prio = 0;
 		if (auditd_test_task(current))
