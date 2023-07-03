@@ -45,6 +45,7 @@
 #include <linux/memcontrol.h>
 #include <linux/bpf-cgroup.h>
 #include <linux/siphash.h>
+#include <linux/tracepoint-defs.h>
 
 extern struct inet_hashinfo tcp_hashinfo;
 
@@ -2264,6 +2265,10 @@ static inline void tcp_segs_in(struct tcp_sock *tp, const struct sk_buff *skb)
 		WRITE_ONCE(tp->data_segs_in, tp->data_segs_in + segs_in);
 }
 
+DECLARE_TRACEPOINT(tcp_listen_queue_drop);
+
+void do_trace_tcp_listen_queue_drop_wrapper(const struct sock *sk);
+
 /*
  * TCP listen path runs lockless.
  * We forced "struct sock" to be const qualified to make sure
@@ -2275,6 +2280,8 @@ static inline void tcp_listendrop(const struct sock *sk)
 {
 	atomic_inc(&((struct sock *)sk)->sk_drops);
 	__NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENDROPS);
+	if (tracepoint_enabled(tcp_listen_queue_drop))
+		do_trace_tcp_listen_queue_drop_wrapper(sk);
 }
 
 enum hrtimer_restart tcp_pace_kick(struct hrtimer *timer);

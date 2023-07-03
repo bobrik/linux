@@ -416,6 +416,52 @@ TRACE_EVENT(tcp_cong_state_set,
 		  __entry->cong_state)
 );
 
+TRACE_EVENT(tcp_listen_queue_drop,
+
+	TP_PROTO(const struct sock *sk),
+
+	TP_ARGS(sk),
+
+	TP_STRUCT__entry(
+		__field(const void *, skaddr)
+		__field(__u16, sport)
+		__array(__u8, saddr, 4)
+		__array(__u8, saddr_v6, 16)
+		__field(__u32, sk_max_ack_backlog)
+		__field(__u32, sk_ack_backlog)
+	),
+
+	TP_fast_assign(
+		const struct inet_sock *inet = inet_sk(sk);
+		struct in6_addr *pin6;
+		__be32 *p32;
+
+		__entry->skaddr = sk;
+
+		__entry->sport = ntohs(inet->inet_sport);
+
+		p32 = (__be32 *) __entry->saddr;
+		*p32 = inet->inet_saddr;
+
+		pin6 = (struct in6_addr *)__entry->saddr_v6;
+#if IS_ENABLED(CONFIG_IPV6)
+		if (sk->sk_family == AF_INET6)
+			*pin6 = sk->sk_v6_rcv_saddr;
+		else
+			ipv6_addr_set_v4mapped(inet->inet_saddr, pin6);
+#else
+		ipv6_addr_set_v4mapped(inet->inet_saddr, pin6);
+#endif
+
+		__entry->sk_max_ack_backlog = READ_ONCE(sk->sk_max_ack_backlog);
+		__entry->sk_ack_backlog = READ_ONCE(sk->sk_ack_backlog);
+	),
+
+	TP_printk("sport=%hu saddr=%pI4 saddrv6=%pI6c sk_max_ack_backlog=%d sk_ack_backlog=%d",
+		__entry->sport, __entry->saddr, __entry->saddr_v6,
+		__entry->sk_max_ack_backlog, __entry->sk_ack_backlog)
+);
+
 #endif /* _TRACE_TCP_H */
 
 /* This part must be outside protection */
