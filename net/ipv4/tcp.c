@@ -276,6 +276,8 @@
 #include <net/ip.h>
 #include <net/sock.h>
 
+#include <trace/events/tcp.h>
+
 #include <linux/uaccess.h>
 #include <asm/ioctls.h>
 #include <net/busy_poll.h>
@@ -1696,6 +1698,11 @@ int tcp_peek_len(struct socket *sock)
 	return tcp_inq(sock->sk);
 }
 EXPORT_SYMBOL(tcp_peek_len);
+
+void do_trace_tcp_listen_queue_drop_wrapper(const struct sock *sk)
+{
+	trace_tcp_listen_queue_drop(sk);
+}
 
 /* Make sure sk_rcvbuf is big enough to satisfy SO_RCVLOWAT hint */
 int tcp_set_rcvlowat(struct sock *sk, int val)
