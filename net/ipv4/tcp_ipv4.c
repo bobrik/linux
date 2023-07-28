@@ -1655,6 +1655,7 @@ struct sock *tcp_v4_syn_recv_sock(const struct sock *sk, struct sk_buff *skb,
 
 exit_overflow:
 	NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
+	trace_tcp_listen_queue_overflow(sk);
 exit_nonewsk:
 	dst_release(dst);
 exit:

@@ -1406,6 +1406,7 @@ static struct sock *tcp_v6_syn_recv_sock(const struct sock *sk, struct sk_buff *
 
 out_overflow:
 	__NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
+	trace_tcp_listen_queue_overflow(sk);
 out_nonewsk:
 	dst_release(dst);
 out:

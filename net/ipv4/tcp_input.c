@@ -6916,6 +6916,7 @@ u16 tcp_get_syncookie_mss(struct request_sock_ops *rsk_ops,
 
 	if (sk_acceptq_is_full(sk)) {
 		NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
+		trace_tcp_listen_queue_overflow(sk);
 		return 0;
 	}
 
@@ -6957,6 +6958,7 @@ int tcp_conn_request(struct request_sock_ops *rsk_ops,
 
 	if (sk_acceptq_is_full(sk)) {
 		NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
+		trace_tcp_listen_queue_overflow(sk);
 		goto drop;
 	}
 

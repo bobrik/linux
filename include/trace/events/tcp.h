@@ -416,7 +416,7 @@ TRACE_EVENT(tcp_cong_state_set,
 		  __entry->cong_state)
 );
 
-TRACE_EVENT(tcp_listen_queue_drop,
+DECLARE_EVENT_CLASS(tcp_event_listen_queue,
 
 	TP_PROTO(const struct sock *sk),
 
@@ -460,6 +460,20 @@ TRACE_EVENT(tcp_listen_queue_drop,
 	TP_printk("sport=%hu saddr=%pI4 saddrv6=%pI6c sk_max_ack_backlog=%d sk_ack_backlog=%d",
 		__entry->sport, __entry->saddr, __entry->saddr_v6,
 		__entry->sk_max_ack_backlog, __entry->sk_ack_backlog)
+);
+
+DEFINE_EVENT(tcp_event_listen_queue, tcp_listen_queue_drop,
+
+	TP_PROTO(const struct sock *sk),
+
+	TP_ARGS(sk)
+);
+
+DEFINE_EVENT(tcp_event_listen_queue, tcp_listen_queue_overflow,
+
+	TP_PROTO(const struct sock *sk),
+
+	TP_ARGS(sk)
 );
 
 #endif /* _TRACE_TCP_H */
